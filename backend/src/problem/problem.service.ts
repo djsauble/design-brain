@@ -11,7 +11,9 @@ export class ProblemService {
   ) {}
 
   async create(createProblemDto: { brief: string }): Promise<Problem> {
-    return this.problemsRepository.create(createProblemDto);
+    const newProblem = this.problemsRepository.create(createProblemDto);
+    const savedProblem = await this.problemsRepository.save(newProblem);
+    return savedProblem;
   }
   async findAll(): Promise<Problem[]> {
     return this.problemsRepository.find();

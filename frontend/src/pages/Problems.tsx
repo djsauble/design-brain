@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { Problem as ProblemType } from "../types";
 
 const fetchProblems = async () => {
-  const res = await fetch('/api/problems');
+  const res = await fetch('/problems');
   if (!res.ok) {
     throw new Error('Network response was not ok');
   }
@@ -12,7 +12,7 @@ const fetchProblems = async () => {
 };
 
 const createProblem = async (brief: string) => {
-  const res = await fetch('/api/problems', {
+  const res = await fetch('/problems', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ brief }),
