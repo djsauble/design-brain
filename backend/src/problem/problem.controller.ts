@@ -10,4 +10,8 @@ export class ProblemController {
   create(@Body() createProblemDto: { brief: string }): Promise<Problem> {
     return this.problemService.create(createProblemDto);
   }
+  @Get()
+  findAll(): Promise<Problem[]> {
+    return this.problemService.findAll();
+  }
 }

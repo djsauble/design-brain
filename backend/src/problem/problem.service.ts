@@ -13,4 +13,7 @@ export class ProblemService {
   async create(createProblemDto: { brief: string }): Promise<Problem> {
     return this.problemsRepository.create(createProblemDto);
   }
+  async findAll(): Promise<Problem[]> {
+    return this.problemsRepository.find();
+  }
 }
