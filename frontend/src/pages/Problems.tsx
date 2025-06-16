@@ -43,30 +43,32 @@ export function Problems() {
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div>
+    <div className="p-6 text-gray-800"> {/* Added padding and text color */}
       <h1 className="text-3xl font-bold mb-4">Problems</h1>
-      <div className="mb-4">
+      <div className="mb-6 p-4 bg-white rounded-lg shadow-md"> {/* Wrapped input/button in a card */}
         <input
           type="text"
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
-          className="p-2 border rounded-md"
+          className="p-2 border border-gray-300 rounded-md w-full mb-2 focus:ring-2 focus:ring-blue-500"
           placeholder="New problem brief"
         />
         <button
           onClick={() => mutation.mutate(brief)}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Add Problem
         </button>
       </div>
-      <ul>
+      <div className="space-y-4"> {/* Added space between cards */}
         {problems.map((problem) => (
-          <li key={problem.id} className="p-2 border-b">
-            <Link to={`/problems/${problem.id}`}>{problem.brief}</Link>
-          </li>
+          <div key={problem.id} className="bg-white p-4 rounded-lg shadow-md"> {/* Wrapped each problem in a card */}
+            <Link to={`/problems/${problem.id}`} className="text-blue-600 hover:underline"> {/* Styled link */}
+              {problem.brief}
+            </Link>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

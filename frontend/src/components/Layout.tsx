@@ -2,12 +2,9 @@ import { Outlet, NavLink } from "react-router";
 
 export function Layout() {
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-64 bg-white shadow-md">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">Product Discovery</h1>
-        </div>
-        <nav className="mt-4">
+    <div className="flex flex-col h-screen bg-gray-100">
+      <div className="bg-white shadow-md">
+        <nav>
           <NavLink to="/problems" className="block p-4 text-gray-700 hover:bg-gray-200">
             Problems
           </NavLink>
