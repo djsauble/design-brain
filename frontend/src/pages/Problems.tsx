@@ -43,19 +43,19 @@ export function Problems() {
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div className="p-6 text-gray-800"> {/* Added padding and text color */}
+    <div>
       <h1 className="text-3xl font-bold mb-4">Problems</h1>
-      <div className="mb-6 p-4 bg-white rounded-lg shadow-md"> {/* Wrapped input/button in a card */}
+      <div className="flex space-x-2 mb-6 p-4 bg-white rounded-lg shadow-md"> {/* Wrapped input/button in a card */}
         <input
           type="text"
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md w-full mb-2 focus:ring-2 focus:ring-blue-500"
+          className="flex-1 p-2 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-blue-500"
           placeholder="New problem brief"
         />
         <button
           onClick={() => mutation.mutate(brief)}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Add Problem
         </button>

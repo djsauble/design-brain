@@ -93,34 +93,34 @@ export function Problem() {
           title="Delete Problem"
           message="Are you sure you want to delete this problem? This action cannot be undone."
       />
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-start mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Problem Details</h1>
-          <div className="flex space-x-2">
-              <button onClick={() => setIsEditing(!isEditing)} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors">
-                  {isEditing ? 'Cancel' : 'Edit'}
-              </button>
-              <button onClick={() => setIsDeleteModalOpen(true)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                  Delete
-              </button>
-          </div>
-        </div>
-        
-        {isEditing ? (
-          <div>
+      <h1 className="text-3xl font-bold mb-4">Problem Details</h1>
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="flex space-x-2 justify-between items-start">
+          {isEditing ? (
+            <div className="flex-1">
               <textarea
                   value={brief}
                   onChange={(e) => setBrief(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  rows={5}
+                  rows={1}
               />
-              <button onClick={handleUpdate} className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                  Save Changes
-              </button>
-          </div>
-        ) : (
-          <p className="text-gray-700 whitespace-pre-wrap">{problem.brief}</p>
-        )}
+            </div>
+          ) : (
+            <p className="flex-1 py-2 text-gray-700 whitespace-pre-wrap">{problem.brief}</p>
+          )}
+          <button onClick={() => setIsEditing(!isEditing)} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors">
+              {isEditing ? 'Cancel' : 'Edit'}
+          </button>
+          {isEditing ? (
+            <button onClick={handleUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                Save
+            </button>
+          ) : (
+            <button onClick={() => setIsDeleteModalOpen(true)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                Delete
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mt-8">
