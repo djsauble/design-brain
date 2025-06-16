@@ -6,7 +6,7 @@ export function Layout() {
       <div className="bg-white shadow-md">
         <nav>
           <NavLink to="/problems" className="block p-4 text-gray-700 hover:bg-gray-200">
-            Problems
+            Design Brain
           </NavLink>
         </nav>
       </div>
