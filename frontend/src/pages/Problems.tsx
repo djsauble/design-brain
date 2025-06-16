@@ -54,6 +54,7 @@ export function Problems() {
           onButtonClick={() => mutation.mutate(brief)}
           placeholder="New problem brief"
           buttonText="Add Problem"
+          inputType="textarea"
         />
       </Card>
       <div className="space-y-4">
