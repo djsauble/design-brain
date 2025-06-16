@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Problem as ProblemType } from "../types";
 import { ConfirmationModal } from "../components/ConfirmationModal";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { InputWithButton } from "../components/InputWithButton";
-import { ListItem } from "../components/ListItem";
 
 // API function to fetch a single problem by its ID
 const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
@@ -154,56 +153,58 @@ export function Problem() {
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Research</h2>
-        <Card className="text-gray-500">
+        <Card className="mb-6">
+          <InputWithButton
+            value={newResearch}
+            onChange={(e) => setNewResearch(e.target.value)}
+            onButtonClick={handleAddResearch}
+            placeholder="Add new research..."
+            buttonText="Add Research"
+            buttonVariant="success"
+            inputType="textarea"
+          />
+        </Card>
+        <div className="space-y-4">
           {problem.relatedResearch && problem.relatedResearch.length > 0 ? (
-            <ul>
-              {problem.relatedResearch.map((research, index) => (
-                <ListItem key={index}>{research}</ListItem>
-              ))}
-            </ul>
+            problem.relatedResearch.map((research, index) => (
+              <Card>
+                <Link key={index} to="#">
+                  {research}
+                </Link>
+              </Card>
+            ))
           ) : (
             <p>No research associated with this problem yet.</p>
           )}
-          <div className="mt-4">
-            <InputWithButton
-              value={newResearch}
-              onChange={(e) => setNewResearch(e.target.value)}
-              onButtonClick={handleAddResearch}
-              placeholder="Add new research..."
-              buttonText="Add Research"
-              buttonVariant="success"
-              inputType="textarea"
-              rows={2}
-            />
-          </div>
-        </Card>
+        </div>
       </div>
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Experiments</h2>
-        <Card className="text-gray-500">
+        <Card className="mb-6">
+          <InputWithButton
+            value={newExperiment}
+            onChange={(e) => setNewExperiment(e.target.value)}
+            onButtonClick={handleAddExperiment}
+            placeholder="Add new experiment..."
+            buttonText="Add Experiment"
+            buttonVariant="success"
+            inputType="textarea"
+          />
+        </Card>
+        <div className="space-y-4">
           {problem.relatedExperiments && problem.relatedExperiments.length > 0 ? (
-            <ul>
-              {problem.relatedExperiments.map((experiment, index) => (
-                <ListItem key={index}>{experiment}</ListItem>
-              ))}
-            </ul>
+            problem.relatedExperiments.map((experiment, index) => (
+              <Card>
+                <Link key={index} to="#">
+                  {experiment}
+                </Link>
+              </Card>
+            ))
           ) : (
             <p>No experiments created for this problem yet.</p>
           )}
-          <div className="mt-4">
-            <InputWithButton
-              value={newExperiment}
-              onChange={(e) => setNewExperiment(e.target.value)}
-              onButtonClick={handleAddExperiment}
-              placeholder="Add new experiment..."
-              buttonText="Add Experiment"
-              buttonVariant="success"
-              inputType="textarea"
-              rows={2}
-            />
-          </div>
-        </Card>
+        </div>
       </div>
     </>
   );

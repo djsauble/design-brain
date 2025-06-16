@@ -47,7 +47,7 @@ export function Problems() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">Problems</h1>
-      <Card className="mb-6"> {/* Wrapped input/button in a card */}
+      <Card className="mb-6">
         <InputWithButton
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
@@ -56,10 +56,10 @@ export function Problems() {
           buttonText="Add Problem"
         />
       </Card>
-      <div className="space-y-4"> {/* Added space between cards */}
+      <div className="space-y-4">
         {problems.map((problem) => (
-          <Card key={problem.id}> {/* Wrapped each problem in a card */}
-            <Link to={`/problems/${problem.id}`} className="text-blue-600 hover:underline"> {/* Styled link */}
+          <Card key={problem.id}>
+            <Link to={`/problems/${problem.id}`}>
               {problem.brief}
             </Link>
           </Card>
