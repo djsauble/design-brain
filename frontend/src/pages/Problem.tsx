@@ -3,6 +3,10 @@ import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Problem as ProblemType } from "../types";
 import { ConfirmationModal } from "../components/ConfirmationModal";
+import { Card } from "../components/Card";
+import { Button } from "../components/Button";
+import { InputWithButton } from "../components/InputWithButton";
+import { ListItem } from "../components/ListItem";
 
 // API function to fetch a single problem by its ID
 const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
@@ -119,7 +123,7 @@ export function Problem() {
           message="Are you sure you want to delete this problem? This action cannot be undone."
       />
       <h1 className="text-3xl font-bold mb-4">Problem Details</h1>
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <Card>
         <div className="flex space-x-2 justify-between items-start">
           {isEditing ? (
             <div className="flex-1">
@@ -133,73 +137,73 @@ export function Problem() {
           ) : (
             <p className="flex-1 py-2 text-gray-700 whitespace-pre-wrap">{problem.brief}</p>
           )}
-          <button onClick={() => setIsEditing(!isEditing)} className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors">
+          <Button variant="warning" onClick={() => setIsEditing(!isEditing)}>
               {isEditing ? 'Cancel' : 'Edit'}
-          </button>
+          </Button>
           {isEditing ? (
-            <button onClick={handleUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            <Button variant="primary" onClick={handleUpdate}>
                 Save
-            </button>
+            </Button>
           ) : (
-            <button onClick={() => setIsDeleteModalOpen(true)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            <Button variant="danger" onClick={() => setIsDeleteModalOpen(true)}>
                 Delete
-            </button>
+            </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Research</h2>
-        <div className="bg-white p-4 rounded-lg shadow-md text-gray-500">
+        <Card className="text-gray-500">
           {problem.relatedResearch && problem.relatedResearch.length > 0 ? (
             <ul>
               {problem.relatedResearch.map((research, index) => (
-                <li key={index} className="mb-2 whitespace-pre-wrap">{research}</li>
+                <ListItem key={index}>{research}</ListItem>
               ))}
             </ul>
           ) : (
             <p>No research associated with this problem yet.</p>
           )}
-          <div className="mt-4 flex">
-            <textarea
+          <div className="mt-4">
+            <InputWithButton
               value={newResearch}
               onChange={(e) => setNewResearch(e.target.value)}
-              className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mr-2"
-              rows={2}
+              onButtonClick={handleAddResearch}
               placeholder="Add new research..."
+              buttonText="Add Research"
+              buttonVariant="success"
+              inputType="textarea"
+              rows={2}
             />
-            <button onClick={handleAddResearch} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-              Add Research
-            </button>
           </div>
-        </div>
+        </Card>
       </div>
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Experiments</h2>
-        <div className="bg-white p-4 rounded-lg shadow-md text-gray-500">
+        <Card className="text-gray-500">
           {problem.relatedExperiments && problem.relatedExperiments.length > 0 ? (
             <ul>
               {problem.relatedExperiments.map((experiment, index) => (
-                <li key={index} className="mb-2 whitespace-pre-wrap">{experiment}</li>
+                <ListItem key={index}>{experiment}</ListItem>
               ))}
             </ul>
           ) : (
             <p>No experiments created for this problem yet.</p>
           )}
-          <div className="mt-4 flex">
-            <textarea
+          <div className="mt-4">
+            <InputWithButton
               value={newExperiment}
               onChange={(e) => setNewExperiment(e.target.value)}
-              className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mr-2"
-              rows={2}
+              onButtonClick={handleAddExperiment}
               placeholder="Add new experiment..."
+              buttonText="Add Experiment"
+              buttonVariant="success"
+              inputType="textarea"
+              rows={2}
             />
-            <button onClick={handleAddExperiment} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-              Add Experiment
-            </button>
           </div>
-        </div>
+        </Card>
       </div>
     </>
   );

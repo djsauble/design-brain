@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from "react-router";
 import { useState } from 'react';
 import type { Problem as ProblemType } from "../types";
+import { Card } from "../components/Card";
+import { InputWithButton } from "../components/InputWithButton";
 
 const fetchProblems = async () => {
   const res = await fetch('http://localhost:3000/problems');
@@ -45,28 +47,22 @@ export function Problems() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">Problems</h1>
-      <div className="flex space-x-2 mb-6 p-4 bg-white rounded-lg shadow-md"> {/* Wrapped input/button in a card */}
-        <input
-          type="text"
+      <Card className="mb-6"> {/* Wrapped input/button in a card */}
+        <InputWithButton
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
-          className="flex-1 p-2 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-blue-500"
+          onButtonClick={() => mutation.mutate(brief)}
           placeholder="New problem brief"
+          buttonText="Add Problem"
         />
-        <button
-          onClick={() => mutation.mutate(brief)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Add Problem
-        </button>
-      </div>
+      </Card>
       <div className="space-y-4"> {/* Added space between cards */}
         {problems.map((problem) => (
-          <div key={problem.id} className="bg-white p-4 rounded-lg shadow-md"> {/* Wrapped each problem in a card */}
+          <Card key={problem.id}> {/* Wrapped each problem in a card */}
             <Link to={`/problems/${problem.id}`} className="text-blue-600 hover:underline"> {/* Styled link */}
               {problem.brief}
             </Link>
-          </div>
+          </Card>
         ))}
       </div>
     </div>
