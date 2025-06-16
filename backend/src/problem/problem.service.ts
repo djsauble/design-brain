@@ -18,4 +18,20 @@ export class ProblemService {
   async findAll(): Promise<Problem[]> {
     return this.problemsRepository.find();
   }
+  async findOne(id: number): Promise<Problem | null> {
+    return this.problemsRepository.findOneBy({ id });
+  }
+
+  async update(id: number, updateProblemDto: { brief: string }): Promise<Problem | null> {
+    const problem = await this.problemsRepository.findOneBy({ id });
+    if (!problem) {
+      return null;
+    }
+    problem.brief = updateProblemDto.brief;
+    return this.problemsRepository.save(problem);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.problemsRepository.delete(id);
+  }
 }
