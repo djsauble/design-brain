@@ -6,12 +6,6 @@ import { ProblemService } from './problem.service'
 
 @Module({
     imports: [
-        TypeOrmModule.forRoot({
-            type: 'sqlite',
-            database: 'db.sqlite',
-            entities: [Problem],
-            synchronize: true,
-        }),
         TypeOrmModule.forFeature([Problem]),
     ],
     controllers: [ProblemController],

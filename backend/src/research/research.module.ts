@@ -6,12 +6,6 @@ import { ResearchService } from './research.service';
 
 @Module({
     imports: [
-        TypeOrmModule.forRoot({
-            type: 'sqlite',
-            database: 'db.sqlite',
-            entities: [Research],
-            synchronize: true,
-        }),
         TypeOrmModule.forFeature([Research]),
     ],
     controllers: [ResearchController],
