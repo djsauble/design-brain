@@ -7,14 +7,14 @@ import { ConfirmationModal } from "../components/ConfirmationModal";
 // API function to fetch a single problem by its ID
 const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
   if (!id) throw new Error("Problem ID is required");
-  const res = await fetch(`/api/problems/${id}`);
+  const res = await fetch(`http://localhost:3000/problems/${id}`);
   if (!res.ok) throw new Error('Network response was not ok');
   return res.json();
 };
 
 // API function to update a problem
 const updateProblem = async ({ id, brief }: { id: string; brief: string }): Promise<ProblemType> => {
-    const res = await fetch(`/api/problems/${id}`, {
+    const res = await fetch(`http://localhost:3000/problems/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ brief }),
@@ -25,7 +25,7 @@ const updateProblem = async ({ id, brief }: { id: string; brief: string }): Prom
 
 // API function to delete a problem
 const deleteProblem = async (id: string): Promise<void> => {
-    const res = await fetch(`/api/problems/${id}`, { method: 'DELETE' });
+    const res = await fetch(`http://localhost:3000/problems/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Network response was not ok');
 }
 
