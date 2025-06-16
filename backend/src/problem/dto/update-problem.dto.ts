@@ -1,5 +1,4 @@
-export interface Problem {
-  id: number;
+export class UpdateProblemDto {
   brief: string;
   relatedResearch: string[];
   relatedExperiments: string[];

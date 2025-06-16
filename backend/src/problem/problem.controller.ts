@@ -1,13 +1,15 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, NotFoundException } from '@nestjs/common';
 import { ProblemService } from './problem.service';
 import { Problem } from './problem.model';
+import { CreateProblemDto } from './dto/create-problem.dto';
+import { UpdateProblemDto } from './dto/update-problem.dto';
 
 @Controller('problems')
 export class ProblemController {
   constructor(private readonly problemService: ProblemService) {}
 
   @Post()
-  create(@Body() createProblemDto: { brief: string }): Promise<Problem> {
+  create(@Body() createProblemDto: CreateProblemDto): Promise<Problem> {
     return this.problemService.create(createProblemDto);
   }
 
@@ -26,7 +28,7 @@ export class ProblemController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateProblemDto: { brief: string }): Promise<Problem> {
+  async update(@Param('id') id: number, @Body() updateProblemDto: UpdateProblemDto): Promise<Problem> {
     const problem = await this.problemService.update(id, updateProblemDto);
     if (!problem) {
       throw new NotFoundException(`Problem with ID ${id} not found`);

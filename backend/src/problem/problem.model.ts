@@ -7,4 +7,10 @@ export class Problem {
 
   @Column()
   brief: string;
+
+  @Column('simple-array', { nullable: true })
+  relatedResearch: string[];
+
+  @Column('simple-array', { nullable: true })
+  relatedExperiments: string[];
 }

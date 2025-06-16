@@ -2,6 +2,8 @@ import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Problem } from './problem.model';
+import { CreateProblemDto } from './dto/create-problem.dto';
+import { UpdateProblemDto } from './dto/update-problem.dto';
 
 @Injectable()
 export class ProblemService {
@@ -10,7 +12,7 @@ export class ProblemService {
     private readonly problemsRepository: Repository<Problem>
   ) {}
 
-  async create(createProblemDto: { brief: string }): Promise<Problem> {
+  async create(createProblemDto: CreateProblemDto): Promise<Problem> {
     const newProblem = this.problemsRepository.create(createProblemDto);
     const savedProblem = await this.problemsRepository.save(newProblem);
     return savedProblem;
@@ -22,12 +24,14 @@ export class ProblemService {
     return this.problemsRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateProblemDto: { brief: string }): Promise<Problem | null> {
+  async update(id: number, updateProblemDto: UpdateProblemDto): Promise<Problem | null> {
     const problem = await this.problemsRepository.findOneBy({ id });
     if (!problem) {
       return null;
     }
     problem.brief = updateProblemDto.brief;
+    problem.relatedResearch = updateProblemDto.relatedResearch;
+    problem.relatedExperiments = updateProblemDto.relatedExperiments;
     return this.problemsRepository.save(problem);
   }
 

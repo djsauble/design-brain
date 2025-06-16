@@ -13,11 +13,11 @@ const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
 };
 
 // API function to update a problem
-const updateProblem = async ({ id, brief }: { id: string; brief: string }): Promise<ProblemType> => {
+const updateProblem = async ({ id, brief, relatedResearch, relatedExperiments }: ProblemType): Promise<ProblemType> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brief }),
+        body: JSON.stringify({ brief, relatedResearch, relatedExperiments }),
     });
     if (!res.ok) throw new Error('Network response was not ok');
     return res.json();
@@ -36,6 +36,8 @@ export function Problem() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [brief, setBrief] = useState('');
+  const [newResearch, setNewResearch] = useState('');
+  const [newExperiment, setNewExperiment] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { data: problem, isLoading, isError } = useQuery<ProblemType>({
@@ -68,8 +70,8 @@ export function Problem() {
   });
 
   const handleUpdate = () => {
-    if(id && brief.trim()) {
-        updateMutation.mutate({ id, brief });
+    if(id && brief.trim() && problem) {
+        updateMutation.mutate({ id: problem.id, brief, relatedResearch: problem.relatedResearch, relatedExperiments: problem.relatedExperiments });
     }
   }
 
@@ -79,6 +81,29 @@ export function Problem() {
           setIsDeleteModalOpen(false);
       }
   }
+
+  const handleAddResearch = () => {
+    if (id && newResearch.trim() && problem) {
+      const updatedProblem = {
+        ...problem,
+        relatedResearch: [...(problem.relatedResearch || []), newResearch.trim()],
+      };
+      updateMutation.mutate({...updatedProblem, id: updatedProblem.id});
+      setNewResearch('');
+    }
+  };
+
+  const handleAddExperiment = () => {
+    if (id && newExperiment.trim() && problem) {
+      const updatedProblem = {
+        ...problem,
+        relatedExperiments: [...(problem.relatedExperiments || []), newExperiment.trim()],
+      };
+      updateMutation.mutate({...updatedProblem, id: updatedProblem.id});
+      setNewExperiment('');
+    }
+  };
+
 
   if (isLoading) return <div className="text-center p-4">Loading problem details...</div>;
   if (isError) return <div className="text-center p-4 text-red-600">Error fetching problem data.</div>;
@@ -126,16 +151,54 @@ export function Problem() {
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Research</h2>
         <div className="bg-white p-4 rounded-lg shadow-md text-gray-500">
-          {/* Placeholder for where you would list related research items */}
-          <p>Research associated with this problem will be listed here.</p>
+          {problem.relatedResearch && problem.relatedResearch.length > 0 ? (
+            <ul>
+              {problem.relatedResearch.map((research, index) => (
+                <li key={index} className="mb-2 whitespace-pre-wrap">{research}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No research associated with this problem yet.</p>
+          )}
+          <div className="mt-4 flex">
+            <textarea
+              value={newResearch}
+              onChange={(e) => setNewResearch(e.target.value)}
+              className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mr-2"
+              rows={2}
+              placeholder="Add new research..."
+            />
+            <button onClick={handleAddResearch} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              Add Research
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">Related Experiments</h2>
         <div className="bg-white p-4 rounded-lg shadow-md text-gray-500">
-          {/* Placeholder for where you would list related experiment items */}
-          <p>Experiments created to solve this problem will be listed here.</p>
+          {problem.relatedExperiments && problem.relatedExperiments.length > 0 ? (
+            <ul>
+              {problem.relatedExperiments.map((experiment, index) => (
+                <li key={index} className="mb-2 whitespace-pre-wrap">{experiment}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No experiments created for this problem yet.</p>
+          )}
+          <div className="mt-4 flex">
+            <textarea
+              value={newExperiment}
+              onChange={(e) => setNewExperiment(e.target.value)}
+              className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mr-2"
+              rows={2}
+              placeholder="Add new experiment..."
+            />
+            <button onClick={handleAddExperiment} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              Add Experiment
+            </button>
+          </div>
         </div>
       </div>
     </>
