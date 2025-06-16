@@ -13,4 +13,7 @@ export class Problem {
 
   @Column('simple-array', { nullable: true })
   relatedExperiments: string[];
+
+  @Column({ default: false })
+  isInvestigate: boolean;
 }

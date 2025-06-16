@@ -25,6 +25,18 @@ const createProblem = async (brief: string) => {
   return res.json();
 };
 
+const updateProblem = async (problem: ProblemType) => {
+  const res = await fetch(`http://localhost:3000/problems/${problem.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(problem),
+  });
+  if (!res.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return res.json();
+};
+
 export function Problems() {
   const queryClient = useQueryClient();
   const [brief, setBrief] = useState('');
@@ -41,6 +53,13 @@ export function Problems() {
       setBrief('');
     },
   });
+
+  const updateMutation = useMutation({
+   mutationFn: updateProblem,
+   onSuccess: () => {
+     queryClient.invalidateQueries({ queryKey: ['problems'] });
+   },
+ });
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -59,8 +78,15 @@ export function Problems() {
       </Card>
       <div className="space-y-4">
         {problems.map((problem) => (
-          <Card key={problem.id}>
-            <Link to={`/problems/${problem.id}`}>
+          <Card key={problem.id} className="flex items-center space-x-2 justify-between">
+            <input
+              type="checkbox"
+              id={`investigate-${problem.id}`}
+              checked={problem.isInvestigate || false}
+              onChange={() => updateMutation.mutate({ ...problem, isInvestigate: !problem.isInvestigate })}
+              className="form-checkbox h-5 w-5 text-blue-600"
+            />
+            <Link to={`/problems/${problem.id}`} className="flex-grow">
               {problem.brief}
             </Link>
           </Card>

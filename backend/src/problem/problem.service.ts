@@ -20,6 +20,11 @@ export class ProblemService {
   async findAll(): Promise<Problem[]> {
     return this.problemsRepository.find();
   }
+
+  async findInvestigateProblems(): Promise<Problem[]> {
+    return this.problemsRepository.find({ where: { isInvestigate: true } });
+  }
+
   async findOne(id: number): Promise<Problem | null> {
     return this.problemsRepository.findOneBy({ id });
   }
@@ -32,6 +37,7 @@ export class ProblemService {
     problem.brief = updateProblemDto.brief;
     problem.relatedResearch = updateProblemDto.relatedResearch;
     problem.relatedExperiments = updateProblemDto.relatedExperiments;
+    problem.isInvestigate = updateProblemDto.isInvestigate;
     return this.problemsRepository.save(problem);
   }
 

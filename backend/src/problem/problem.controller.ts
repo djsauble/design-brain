@@ -18,6 +18,11 @@ export class ProblemController {
     return this.problemService.findAll();
   }
 
+  @Get('investigate')
+  findInvestigateProblems(): Promise<Problem[]> {
+    return this.problemService.findInvestigateProblems();
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Problem> {
     const problem = await this.problemService.findOne(id);

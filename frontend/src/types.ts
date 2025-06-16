@@ -3,4 +3,5 @@ export interface Problem {
   brief: string;
   relatedResearch: string[];
   relatedExperiments: string[];
+  isInvestigate?: boolean;
 }
