@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Problem as ProblemType } from "../types";
+import type { Problem as ProblemType, Research } from "../types";
 import { ConfirmationModal } from "../components/ConfirmationModal";
+import { FaTimes } from 'react-icons/fa';
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { InputWithButton } from "../components/InputWithButton";
@@ -16,15 +17,44 @@ const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
 };
 
 // API function to update a problem
-const updateProblem = async ({ id, brief, relatedResearch, relatedExperiments }: ProblemType): Promise<ProblemType> => {
+const updateProblem = async ({ id, brief, relatedExperiments }: ProblemType): Promise<ProblemType> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brief, relatedResearch, relatedExperiments }),
+        body: JSON.stringify({ brief, relatedExperiments }),
     });
     if (!res.ok) throw new Error('Network response was not ok');
     return res.json();
 }
+
+// API function to fetch research items for a problem
+const fetchResearch = async (problemId: string | undefined): Promise<Research[]> => {
+  if (!problemId) return [];
+  const res = await fetch(`http://localhost:3000/problems/${problemId}/research`);
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to create a research item
+const createResearch = async ({ problemId, content }: { problemId: string, content: string }): Promise<Research> => {
+  const res = await fetch(`http://localhost:3000/problems/${problemId}/research`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ problemId, content }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to delete a research item
+const deleteResearch = async ({ problemId, researchId }: { problemId: string, researchId: string }): Promise<void> => {
+  const res = await fetch(`http://localhost:3000/problem/${problemId}/research/${researchId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ problemId }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+};
 
 // API function to delete a problem
 const deleteProblem = async (id: string): Promise<void> => {
@@ -43,9 +73,15 @@ export function Problem() {
   const [newExperiment, setNewExperiment] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { data: problem, isLoading, isError } = useQuery<ProblemType>({
+  const { data: problem, isLoading: isLoadingProblem, isError: isErrorProblem } = useQuery<ProblemType>({
     queryKey: ['problems', id],
     queryFn: () => fetchProblem(id),
+    enabled: !!id,
+  });
+
+  const { data: research, isLoading: isLoadingResearch, isError: isErrorResearch } = useQuery<Research[]>({
+    queryKey: ['research', id],
+    queryFn: () => fetchResearch(id),
     enabled: !!id,
   });
 
@@ -54,6 +90,21 @@ export function Problem() {
         setBrief(problem.brief);
     }
   }, [problem]);
+
+  const createResearchMutation = useMutation({
+    mutationFn: createResearch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['research', id] });
+      setNewResearch('');
+    },
+  });
+
+  const deleteResearchMutation = useMutation({
+    mutationFn: deleteResearch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['research', id] });
+    },
+  });
 
   const updateMutation = useMutation({
     mutationFn: updateProblem,
@@ -74,7 +125,7 @@ export function Problem() {
 
   const handleUpdate = () => {
     if(id && brief.trim() && problem) {
-        updateMutation.mutate({ id: problem.id, brief, relatedResearch: problem.relatedResearch, relatedExperiments: problem.relatedExperiments });
+        updateMutation.mutate({ id: problem.id, brief, research: problem.research, relatedExperiments: problem.relatedExperiments });
     }
   }
 
@@ -86,13 +137,14 @@ export function Problem() {
   }
 
   const handleAddResearch = () => {
-    if (id && newResearch.trim() && problem) {
-      const updatedProblem = {
-        ...problem,
-        relatedResearch: [...(problem.relatedResearch || []), newResearch.trim()],
-      };
-      updateMutation.mutate({...updatedProblem, id: updatedProblem.id});
-      setNewResearch('');
+    if (id && newResearch.trim()) {
+      createResearchMutation.mutate({ problemId: id, content: newResearch.trim() });
+    }
+  };
+
+  const handleDeleteResearch = (researchId: string) => {
+    if (id) {
+      deleteResearchMutation.mutate({ problemId: id, researchId });
     }
   };
 
@@ -108,8 +160,8 @@ export function Problem() {
   };
 
 
-  if (isLoading) return <div className="text-center p-4">Loading problem details...</div>;
-  if (isError) return <div className="text-center p-4 text-red-600">Error fetching problem data.</div>;
+  if (isLoadingProblem || isLoadingResearch) return <div className="text-center p-4">Loading problem details...</div>;
+  if (isErrorProblem || isErrorResearch) return <div className="text-center p-4 text-red-600">Error fetching data.</div>;
   if (!problem) return <div className="text-center p-4">Problem not found.</div>
 
   return (
@@ -165,12 +217,13 @@ export function Problem() {
           />
         </Card>
         <div className="space-y-4">
-          {problem.relatedResearch && problem.relatedResearch.length > 0 ? (
-            problem.relatedResearch.map((research, index) => (
-              <Card>
-                <Link key={index} to="#">
-                  {research}
-                </Link>
+          {research && research.length > 0 ? (
+            research.map((research) => (
+              <Card key={research._id} className="flex justify-between items-start">
+                <p className="flex-1 pr-4 whitespace-pre-wrap">{research.content}</p>
+                <Button variant="danger" className="p-1" onClick={() => handleDeleteResearch(research._id)}>
+                  <FaTimes />
+                </Button>
               </Card>
             ))
           ) : (

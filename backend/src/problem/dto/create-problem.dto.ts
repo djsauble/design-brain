@@ -1,5 +1,7 @@
+import { Research } from '../../research/research.model';
+
 export class CreateProblemDto {
   brief: string;
-  relatedResearch: string[];
+  research: Research[];
   relatedExperiments: string[];
 }

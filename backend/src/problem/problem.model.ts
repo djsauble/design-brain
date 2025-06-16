@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Research } from '../research/research.model';
 
 @Entity()
 export class Problem {
@@ -9,11 +10,11 @@ export class Problem {
   brief: string;
 
   @Column('simple-array', { nullable: true })
-  relatedResearch: string[];
-
-  @Column('simple-array', { nullable: true })
   relatedExperiments: string[];
 
   @Column({ default: false })
   isInvestigate: boolean;
+
+  @OneToMany(() => Research, (research) => research.problem)
+  research: Research[];
 }

@@ -35,7 +35,7 @@ export class ProblemService {
       return null;
     }
     problem.brief = updateProblemDto.brief;
-    problem.relatedResearch = updateProblemDto.relatedResearch;
+    problem.research = updateProblemDto.research;
     problem.relatedExperiments = updateProblemDto.relatedExperiments;
     problem.isInvestigate = updateProblemDto.isInvestigate;
     return this.problemsRepository.save(problem);

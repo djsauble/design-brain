@@ -1,6 +1,8 @@
+import { Research } from '../../research/research.model';
+
 export class UpdateProblemDto {
   brief: string;
-  relatedResearch: string[];
+  research: Research[];
   relatedExperiments: string[];
   isInvestigate: boolean;
 }
