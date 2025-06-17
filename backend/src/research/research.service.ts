@@ -21,6 +21,10 @@ export class ResearchService {
     return this.researchRepository.find({ where: { problem: { id: problem } } })
   }
 
+  async findApprovedByProblemId(problem: number): Promise<Research[]> {
+    return this.researchRepository.find({ where: { problem: { id: problem }, isApproved: true } });
+  }
+
   async remove(id: string): Promise<void> {
     await this.researchRepository.delete(id);
   }

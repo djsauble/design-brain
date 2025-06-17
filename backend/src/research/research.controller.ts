@@ -19,6 +19,13 @@ export class ResearchController {
     return this.researchService.findByProblemId(problem);
   }
 
+  @Get('approved')
+  findApprovedForProblem(
+    @Param('problem', ParseIntPipe) problem: number
+  ): Promise<Research[]> {
+    return this.researchService.findApprovedByProblemId(problem);
+  }
+
   @Delete(':researchId')
   delete(@Param('researchId') researchId: string) {
     try {

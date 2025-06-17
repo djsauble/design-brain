@@ -9,6 +9,9 @@ export class Research {
   @Column()
   content: string;
 
+  @Column({ default: false })
+  isApproved: boolean;
+
   @ManyToOne(() => Problem, (problem) => problem.research)
   problem: Problem;
 }

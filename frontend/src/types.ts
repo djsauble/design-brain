@@ -2,6 +2,7 @@ export interface Research {
   id: string;
   content: string;
   problem: Problem;
+  isApproved?: boolean;
 }
 
 export interface Problem {

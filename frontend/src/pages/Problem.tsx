@@ -56,6 +56,17 @@ const deleteResearch = async ({ problem, id }: { problem: string, id: string }):
   if (!res.ok) throw new Error('Network response was not ok');
 };
 
+// API function to update research item's isApproved status
+const updateResearchIsApproved = async ({ problemId, researchId, isApproved }: { problemId: string, researchId: string, isApproved: boolean }): Promise<Research> => {
+  const res = await fetch(`http://localhost:3000/problems/${problemId}/research/${researchId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isApproved }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
 // API function to delete a problem
 const deleteProblem = async (id: string): Promise<void> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, { method: 'DELETE' });
@@ -101,6 +112,13 @@ export function Problem() {
 
   const deleteResearchMutation = useMutation({
     mutationFn: deleteResearch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['research', id] });
+    },
+  });
+
+  const updateResearchIsApprovedMutation = useMutation({
+    mutationFn: updateResearchIsApproved,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['research', id] });
     },
@@ -221,8 +239,16 @@ export function Problem() {
           {research && research.length > 0 ? (
             research.map((research) => (
               <Card key={research.id} className="flex justify-between items-start">
-                <p className="flex-1 pr-4 whitespace-pre-wrap">{research.content}</p>
-                <Button variant="danger" className="p-1" onClick={() => handleDeleteResearch(problem.id, research.id)}>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={research.isApproved || false}
+                    onChange={(e) => updateResearchIsApprovedMutation.mutate({ problemId: problem.id.toString(), researchId: research.id, isApproved: e.target.checked })}
+                    className="mr-2"
+                  />
+                  <p className="flex-1 pr-4 whitespace-pre-wrap">{research.content}</p>
+                </div>
+                <Button variant="danger" className="p-1" onClick={() => handleDeleteResearch(problem.id.toString(), research.id)}>
                   <FaTimes />
                 </Button>
               </Card>
