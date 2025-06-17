@@ -28,30 +28,30 @@ const updateProblem = async ({ id, brief, relatedExperiments }: ProblemType): Pr
 }
 
 // API function to fetch research items for a problem
-const fetchResearch = async (problemId: string | undefined): Promise<Research[]> => {
-  if (!problemId) return [];
-  const res = await fetch(`http://localhost:3000/problems/${problemId}/research`);
+const fetchResearch = async (problem: string | undefined): Promise<Research[]> => {
+  if (!problem) return [];
+  const res = await fetch(`http://localhost:3000/problems/${problem}/research`);
   if (!res.ok) throw new Error('Network response was not ok');
   return res.json();
 };
 
 // API function to create a research item
-const createResearch = async ({ problemId, content }: { problemId: string, content: string }): Promise<Research> => {
-  const res = await fetch(`http://localhost:3000/problems/${problemId}/research`, {
+const createResearch = async ({ problem, content }: { problem: string, content: string }): Promise<Research> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/research`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ problemId, content }),
+    body: JSON.stringify({ problem, content }),
   });
   if (!res.ok) throw new Error('Network response was not ok');
   return res.json();
 };
 
 // API function to delete a research item
-const deleteResearch = async ({ problemId, researchId }: { problemId: string, researchId: string }): Promise<void> => {
-  const res = await fetch(`http://localhost:3000/problem/${problemId}/research/${researchId}`, {
+const deleteResearch = async ({ problem, id }: { problem: string, id: string }): Promise<void> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/research/${id}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ problemId }),
+    body: JSON.stringify({ problem }),
   });
   if (!res.ok) throw new Error('Network response was not ok');
 };
@@ -138,13 +138,14 @@ export function Problem() {
 
   const handleAddResearch = () => {
     if (id && newResearch.trim()) {
-      createResearchMutation.mutate({ problemId: id, content: newResearch.trim() });
+      createResearchMutation.mutate({ problem: id, content: newResearch.trim() });
+      setNewResearch('');
     }
   };
 
-  const handleDeleteResearch = (researchId: string) => {
+  const handleDeleteResearch = (problem: string, id: string) => {
     if (id) {
-      deleteResearchMutation.mutate({ problemId: id, researchId });
+      deleteResearchMutation.mutate({ problem: problem, id });
     }
   };
 
@@ -219,9 +220,9 @@ export function Problem() {
         <div className="space-y-4">
           {research && research.length > 0 ? (
             research.map((research) => (
-              <Card key={research._id} className="flex justify-between items-start">
+              <Card key={research.id} className="flex justify-between items-start">
                 <p className="flex-1 pr-4 whitespace-pre-wrap">{research.content}</p>
-                <Button variant="danger" className="p-1" onClick={() => handleDeleteResearch(research._id)}>
+                <Button variant="danger" className="p-1" onClick={() => handleDeleteResearch(problem.id, research.id)}>
                   <FaTimes />
                 </Button>
               </Card>

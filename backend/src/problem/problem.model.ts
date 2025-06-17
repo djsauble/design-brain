@@ -15,6 +15,6 @@ export class Problem {
   @Column({ default: false })
   isInvestigate: boolean;
 
-  @OneToMany(() => Research, (research) => research.problem, { eager: true })
+  @OneToMany(() => Research, (research) => research.problem)
   research: Research[];
 }

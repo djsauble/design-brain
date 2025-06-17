@@ -1,11 +1,6 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { Problem } from '../../problem/problem.model';
 
 export class CreateResearchDto {
-  @IsString()
-  @IsNotEmpty()
-  problemId: string;
-
-  @IsString()
-  @IsNotEmpty()
   content: string;
+  problem: Problem;
 }

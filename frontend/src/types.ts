@@ -1,5 +1,5 @@
 export interface Research {
-  _id: string;
+  id: string;
   content: string;
   problem: Problem;
 }

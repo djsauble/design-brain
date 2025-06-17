@@ -3,7 +3,7 @@ import { Research } from './research.model';
 import { ResearchService } from './research.service';
 import { CreateResearchDto } from './dto/create-research.dto';
 
-@Controller('problems/:problemId/research')
+@Controller('problems/:problem/research')
 export class ResearchController {
   constructor(private readonly researchService: ResearchService) {}
 
@@ -21,9 +21,9 @@ export class ResearchController {
 
   @Get()
   findAllForProblem(
-    @Param('problemId', ParseIntPipe) problemId: number
+    @Param('problem', ParseIntPipe) problem: number
   ): Promise<Research[]> {
-    return this.researchService.findByProblemId(problemId);
+    return this.researchService.findByProblemId(problem);
   }
 
   @Delete(':researchId')

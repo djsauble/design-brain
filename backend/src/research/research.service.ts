@@ -17,8 +17,8 @@ export class ResearchService {
     return savedResearch;
   }
 
-  async findByProblemId(problemId: number): Promise<Research[]> {
-    return this.researchRepository.find({ where: { problem: { id: problemId } } })
+  async findByProblemId(problem: number): Promise<Research[]> {
+    return this.researchRepository.find({ where: { problem: { id: problem } } })
   }
 
   async remove(id: string): Promise<void> {
