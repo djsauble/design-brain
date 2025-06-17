@@ -21,4 +21,21 @@ export class ExperimentService {
   async findByProblemId(problem: number): Promise<Experiment[]> {
     return this.experimentRepository.find({ where: { problem: { id: problem } } });
   }
+
+  async findApprovedByProblemId(problem: number): Promise<Experiment[]> {
+    return this.experimentRepository.find({ where: { problem: { id: problem }, isApproved: true } });
+  }
+
+  async updateIsApproved(id: string, isApproved: boolean): Promise<Experiment> {
+    const experimentItem = await this.experimentRepository.findOne({ where: { id: parseInt(id, 10) } });
+    if (!experimentItem) {
+      throw new NotFoundException(`Experiment item with ID ${id} not found`);
+    }
+    experimentItem.isApproved = isApproved;
+    return this.experimentRepository.save(experimentItem);
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.experimentRepository.delete(id);
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, ParseIntPipe, Patch, Delete, NotFoundException } from '@nestjs/common';
 import { ExperimentService } from './experiment.service';
 import { CreateExperimentDto } from './dto/create-experiment.dto';
 import { Experiment } from './experiment.model';
@@ -17,5 +17,33 @@ export class ExperimentController {
     @Param('problem', ParseIntPipe) problem: number
   ): Promise<Experiment[]> {
     return this.experimentService.findByProblemId(problem);
+  }
+
+  @Get('approved')
+  findApprovedForProblem(
+    @Param('problem', ParseIntPipe) problem: number
+  ): Promise<Experiment[]> {
+    return this.experimentService.findApprovedByProblemId(problem);
+  }
+
+  @Patch(':experimentId')
+  updateIsApproved(
+    @Param('experimentId') experimentId: string,
+    @Body('isApproved') isApproved: boolean,
+  ) {
+    return this.experimentService.updateIsApproved(experimentId, isApproved);
+  }
+
+  @Delete(':experimentId')
+  delete(@Param('experimentId') experimentId: string) {
+    try {
+      this.experimentService.remove(experimentId);
+      return { message: 'Experiment item deleted successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

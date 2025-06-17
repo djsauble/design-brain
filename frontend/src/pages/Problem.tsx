@@ -72,11 +72,18 @@ const deleteProblem = async (id: string): Promise<void> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Network response was not ok');
 }
-
 // API function to fetch experiment items for a problem
 const fetchExperiments = async (problem: string | undefined): Promise<Experiment[]> => {
   if (!problem) return [];
   const res = await fetch(`http://localhost:3000/problems/${problem}/experiments`);
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to fetch approved experiment items for a problem
+const fetchApprovedExperiments = async (problem: string | undefined): Promise<Experiment[]> => {
+  if (!problem) return [];
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/approved`);
   if (!res.ok) throw new Error('Network response was not ok');
   return res.json();
 };
@@ -87,6 +94,27 @@ const createExperiment = async ({ problem, proposal }: { problem: string, propos
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ problem, proposal }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to delete an experiment item
+const deleteExperiment = async ({ problem, id }: { problem: string, id: string }): Promise<void> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ problem }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+};
+
+// API function to update experiment item's isApproved status
+const updateExperimentIsApproved = async ({ problem, experiment, isApproved }: { problem: string, experiment: string, isApproved: boolean }): Promise<Experiment> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/${experiment}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isApproved }),
   });
   if (!res.ok) throw new Error('Network response was not ok');
   return res.json();
@@ -159,6 +187,20 @@ export function Problem() {
     },
   });
 
+  const deleteExperimentMutation = useMutation({
+    mutationFn: deleteExperiment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments', id] });
+    },
+  });
+
+  const updateExperimentIsApprovedMutation = useMutation({
+    mutationFn: updateExperimentIsApproved,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments', id] });
+    },
+  });
+
 
   const updateMutation = useMutation({
     mutationFn: updateProblem,
@@ -206,6 +248,18 @@ export function Problem() {
   const handleAddExperiment = () => {
     if (id && newExperiment.trim()) {
       createExperimentMutation.mutate({ problem: id, proposal: newExperiment.trim() });
+    }
+  };
+
+  const handleDeleteExperiment = (problem: string, id: string) => {
+    if (id) {
+      deleteExperimentMutation.mutate({ problem: problem, id });
+    }
+  };
+
+  const handleUpdateExperimentIsApproved = (problem: string, experiment: string, isApproved: boolean) => {
+    if (id) {
+      updateExperimentIsApprovedMutation.mutate({ problem: problem, experiment: experiment, isApproved: isApproved });
     }
   };
 
@@ -306,10 +360,19 @@ export function Problem() {
         <div className="space-y-4">
           {experiments && experiments.length > 0 ? (
             experiments.map((experiment) => (
-              <Card key={experiment.id}>
+              <Card key={experiment.id} className="flex justify-between items-start">
                 <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={experiment.isApproved || false}
+                    onChange={(e) => handleUpdateExperimentIsApproved(problem.id.toString(), experiment.id.toString(), e.target.checked)}
+                    className="mr-2"
+                  />
                   <p className="flex-1 pr-4 whitespace-pre-wrap">{experiment.proposal}</p>
                 </div>
+                <Button variant="danger" className="p-1" onClick={() => handleDeleteExperiment(problem.id.toString(), experiment.id.toString())}>
+                  <FaTimes />
+                </Button>
               </Card>
             ))
           ) : (

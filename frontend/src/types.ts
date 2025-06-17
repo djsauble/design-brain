@@ -17,4 +17,5 @@ export interface Experiment {
   id: number;
   proposal: string;
   problem: Problem;
+  isApproved?: boolean;
 }

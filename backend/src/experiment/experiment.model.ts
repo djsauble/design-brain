@@ -9,6 +9,9 @@ export class Experiment {
   @Column()
   proposal: string;
 
+  @Column({ default: false })
+  isApproved: boolean;
+
   @ManyToOne(() => Problem, (problem) => problem.experiments)
   problem: Problem;
 }
