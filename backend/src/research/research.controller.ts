@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Delete, Get, NotFoundException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, Get, NotFoundException, ParseIntPipe, Patch } from '@nestjs/common';
 import { Research } from './research.model';
 import { ResearchService } from './research.service';
 import { CreateResearchDto } from './dto/create-research.dto';
@@ -24,6 +24,14 @@ export class ResearchController {
     @Param('problem', ParseIntPipe) problem: number
   ): Promise<Research[]> {
     return this.researchService.findApprovedByProblemId(problem);
+  }
+
+  @Patch(':researchId')
+  updateIsApproved(
+    @Param('researchId') researchId: string,
+    @Body('isApproved') isApproved: boolean,
+  ) {
+    return this.researchService.updateIsApproved(researchId, isApproved);
   }
 
   @Delete(':researchId')
