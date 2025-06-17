@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from "react-router";
 import { useState } from 'react';
-import type { Problem as ProblemType } from "../types";
+import type { Problem } from "../types";
 import { Card } from "../components/Card";
 import { InputWithButton } from "../components/InputWithButton";
 
@@ -25,7 +25,7 @@ const createProblem = async (brief: string) => {
   return res.json();
 };
 
-const updateProblem = async (problem: ProblemType) => {
+const updateProblem = async (problem: Problem) => {
   const res = await fetch(`http://localhost:3000/problems/${problem.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ export function Problems() {
   const queryClient = useQueryClient();
   const [brief, setBrief] = useState('');
 
-  const { data: problems = [], isLoading } = useQuery<ProblemType[]>({
+  const { data: problems = [], isLoading } = useQuery<Problem[]>({
     queryKey: ['problems'],
     queryFn: fetchProblems,
   });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Problem as ProblemType, Research } from "../types";
+import type { Problem, Research } from "../types";
 import { ConfirmationModal } from "../components/ConfirmationModal";
 import { FaTimes } from 'react-icons/fa';
 import { Card } from "../components/Card";
@@ -9,7 +9,7 @@ import { Button } from "../components/Button";
 import { InputWithButton } from "../components/InputWithButton";
 
 // API function to fetch a single problem by its ID
-const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
+const fetchProblem = async (id: string | undefined): Promise<Problem> => {
   if (!id) throw new Error("Problem ID is required");
   const res = await fetch(`http://localhost:3000/problems/${id}`);
   if (!res.ok) throw new Error('Network response was not ok');
@@ -17,7 +17,7 @@ const fetchProblem = async (id: string | undefined): Promise<ProblemType> => {
 };
 
 // API function to update a problem
-const updateProblem = async ({ id, brief, relatedExperiments }: ProblemType): Promise<ProblemType> => {
+const updateProblem = async ({ id, brief, relatedExperiments }: Problem): Promise<Problem> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -73,7 +73,7 @@ export function Problem() {
   const [newExperiment, setNewExperiment] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { data: problem, isLoading: isLoadingProblem, isError: isErrorProblem } = useQuery<ProblemType>({
+  const { data: problem, isLoading: isLoadingProblem, isError: isErrorProblem } = useQuery<Problem>({
     queryKey: ['problems', id],
     queryFn: () => fetchProblem(id),
     enabled: !!id,
