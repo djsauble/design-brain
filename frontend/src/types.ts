@@ -18,4 +18,6 @@ export interface Experiment {
   proposal: string;
   problem: Problem;
   isApproved?: boolean;
+  status?: string;
+  url?: string;
 }

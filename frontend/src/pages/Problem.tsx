@@ -109,7 +109,7 @@ const deleteExperiment = async ({ problem, id }: { problem: string, id: string }
   if (!res.ok) throw new Error('Network response was not ok');
 };
 
-// API function to update experiment item's isApproved status
+// API function to update experiment approval
 const updateExperimentIsApproved = async ({ problem, experiment, isApproved }: { problem: string, experiment: string, isApproved: boolean }): Promise<Experiment> => {
   const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/${experiment}`, {
     method: 'PATCH',
@@ -120,6 +120,27 @@ const updateExperimentIsApproved = async ({ problem, experiment, isApproved }: {
   return res.json();
 };
 
+// API function to update experiment status
+const updateExperimentStatus = async ({ problem, experiment, status }: { problem: string, experiment: string, status: string }) => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/${experiment}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to update experiment URL
+const updateExperimentUrl = async ({ problem, experiment, url }: { problem: string, experiment: string, url: string }) => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments/${experiment}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
 
 // Component for viewing, editing, and deleting a single problem
 export function Problem() {
@@ -201,6 +222,20 @@ export function Problem() {
     },
   });
 
+  const updateExperimentStatusMutation = useMutation({
+    mutationFn: updateExperimentStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments', id] });
+    },
+  });
+
+  const updateExperimentUrlMutation = useMutation({
+    mutationFn: updateExperimentUrl,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments', id] });
+    },
+  });
+
 
   const updateMutation = useMutation({
     mutationFn: updateProblem,
@@ -260,6 +295,18 @@ export function Problem() {
   const handleUpdateExperimentIsApproved = (problem: string, experiment: string, isApproved: boolean) => {
     if (id) {
       updateExperimentIsApprovedMutation.mutate({ problem: problem, experiment: experiment, isApproved: isApproved });
+    }
+  };
+
+  const handleUpdateExperimentStatus = (problem: string, experiment: string, status: string) => {
+    if (id) {
+      updateExperimentStatusMutation.mutate({ problem: problem, experiment: experiment, status: status });
+    }
+  };
+
+  const handleUpdateExperimentUrl = (problem: string, experiment: string, url: string) => {
+    if (id) {
+      updateExperimentUrlMutation.mutate({ problem: problem, experiment: experiment, url: url });
     }
   };
 
@@ -360,19 +407,39 @@ export function Problem() {
         <div className="space-y-4">
           {experiments && experiments.length > 0 ? (
             experiments.map((experiment) => (
-              <Card key={experiment.id} className="flex justify-between items-start">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={experiment.isApproved || false}
-                    onChange={(e) => handleUpdateExperimentIsApproved(problem.id.toString(), experiment.id.toString(), e.target.checked)}
-                    className="mr-2"
-                  />
-                  <p className="flex-1 pr-4 whitespace-pre-wrap">{experiment.proposal}</p>
+              <Card key={experiment.id} className="flex flex-col space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={experiment.isApproved || false}
+                      onChange={(e) => handleUpdateExperimentIsApproved(problem.id.toString(), experiment.id.toString(), e.target.checked)}
+                      className="mr-2"
+                    />
+                    <p className="flex-1 pr-4 whitespace-pre-wrap">{experiment.proposal}</p>
+                  </div>
+                  <Button variant="danger" className="p-1" onClick={() => handleDeleteExperiment(problem.id.toString(), experiment.id.toString())}>
+                    <FaTimes />
+                  </Button>
                 </div>
-                <Button variant="danger" className="p-1" onClick={() => handleDeleteExperiment(problem.id.toString(), experiment.id.toString())}>
-                  <FaTimes />
-                </Button>
+                <div className="flex justify-between space-x-2 items-center text-sm text-gray-600">
+                  <select
+                    value={experiment.status || 'NOT STARTED'}
+                    onChange={(e) => handleUpdateExperimentStatus(problem.id.toString(), experiment.id.toString(), e.target.value)}
+                    className="border rounded-md p-1 h-[30px]"
+                  >
+                    <option value="NOT STARTED">Not started</option>
+                    <option value="IN PROGRESS">In progress</option>
+                    <option value="FINISHED">Finished</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={experiment.url || ''}
+                    onChange={(e) => handleUpdateExperimentUrl(problem.id.toString(), experiment.id.toString(), e.target.value)}
+                    className="border rounded-md p-1 flex-1"
+                    placeholder="Result URL"
+                  />
+                </div>
               </Card>
             ))
           ) : (

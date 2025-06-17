@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Param, Get, ParseIntPipe, Patch, Delete, NotFoundException } from '@nestjs/common';
 import { ExperimentService } from './experiment.service';
 import { CreateExperimentDto } from './dto/create-experiment.dto';
+import { UpdateExperimentDto } from './dto/update-experiment.dto';
 import { Experiment } from './experiment.model';
 
 @Controller('problems/:problem/experiments')
@@ -27,11 +28,11 @@ export class ExperimentController {
   }
 
   @Patch(':experimentId')
-  updateIsApproved(
+  update(
     @Param('experimentId') experimentId: string,
-    @Body('isApproved') isApproved: boolean,
+    @Body() updateExperimentDto: UpdateExperimentDto,
   ) {
-    return this.experimentService.updateIsApproved(experimentId, isApproved);
+    return this.experimentService.update(experimentId, updateExperimentDto);
   }
 
   @Delete(':experimentId')

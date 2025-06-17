@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Experiment } from './experiment.model';
 import { CreateExperimentDto } from './dto/create-experiment.dto';
+import { UpdateExperimentDto } from './dto/update-experiment.dto';
 import { Problem } from '../problem/problem.model';
 
 @Injectable()
@@ -26,12 +27,13 @@ export class ExperimentService {
     return this.experimentRepository.find({ where: { problem: { id: problem }, isApproved: true } });
   }
 
-  async updateIsApproved(id: string, isApproved: boolean): Promise<Experiment> {
+  async update(id: string, updateExperimentDto: UpdateExperimentDto): Promise<Experiment> {
     const experimentItem = await this.experimentRepository.findOne({ where: { id: parseInt(id, 10) } });
     if (!experimentItem) {
       throw new NotFoundException(`Experiment item with ID ${id} not found`);
     }
-    experimentItem.isApproved = isApproved;
+    // Apply partial updates from the DTO
+    Object.assign(experimentItem, updateExperimentDto);
     return this.experimentRepository.save(experimentItem);
   }
 
