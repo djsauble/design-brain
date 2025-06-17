@@ -9,14 +9,7 @@ export class ResearchController {
 
   @Post()
   create(@Body() createResearchDto: CreateResearchDto) {
-    try {
-      this.researchService.create(createResearchDto);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
-    }
+    return this.researchService.create(createResearchDto);
   }
 
   @Get()
