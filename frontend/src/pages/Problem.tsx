@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Problem, Research } from "../types";
+import type { Problem, Research, Experiment } from "../types";
 import { ConfirmationModal } from "../components/ConfirmationModal";
 import { FaTimes } from 'react-icons/fa';
 import { Card } from "../components/Card";
@@ -57,8 +57,8 @@ const deleteResearch = async ({ problem, id }: { problem: string, id: string }):
 };
 
 // API function to update research item's isApproved status
-const updateResearchIsApproved = async ({ problemId, researchId, isApproved }: { problemId: string, researchId: string, isApproved: boolean }): Promise<Research> => {
-  const res = await fetch(`http://localhost:3000/problems/${problemId}/research/${researchId}`, {
+const updateResearchIsApproved = async ({ problem, research, isApproved }: { problem: string, research: string, isApproved: boolean }): Promise<Research> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/research/${research}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isApproved }),
@@ -72,6 +72,26 @@ const deleteProblem = async (id: string): Promise<void> => {
     const res = await fetch(`http://localhost:3000/problems/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Network response was not ok');
 }
+
+// API function to fetch experiment items for a problem
+const fetchExperiments = async (problem: string | undefined): Promise<Experiment[]> => {
+  if (!problem) return [];
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments`);
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
+// API function to create an experiment item
+const createExperiment = async ({ problem, proposal }: { problem: string, proposal: string }): Promise<Experiment> => {
+  const res = await fetch(`http://localhost:3000/problems/${problem}/experiments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ problem, proposal }),
+  });
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+};
+
 
 // Component for viewing, editing, and deleting a single problem
 export function Problem() {
@@ -95,6 +115,13 @@ export function Problem() {
     queryFn: () => fetchResearch(id),
     enabled: !!id,
   });
+
+  const { data: experiments, isLoading: isLoadingExperiments, isError: isErrorExperiments } = useQuery<Experiment[]>({
+    queryKey: ['experiments', id],
+    queryFn: () => fetchExperiments(id),
+    enabled: !!id,
+  });
+
 
   useEffect(() => {
     if (problem) {
@@ -123,6 +150,15 @@ export function Problem() {
       queryClient.invalidateQueries({ queryKey: ['research', id] });
     },
   });
+
+  const createExperimentMutation = useMutation({
+    mutationFn: createExperiment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experiments', id] });
+      setNewExperiment('');
+    },
+  });
+
 
   const updateMutation = useMutation({
     mutationFn: updateProblem,
@@ -168,19 +204,14 @@ export function Problem() {
   };
 
   const handleAddExperiment = () => {
-    if (id && newExperiment.trim() && problem) {
-      const updatedProblem = {
-        ...problem,
-        relatedExperiments: [...(problem.relatedExperiments || []), newExperiment.trim()],
-      };
-      updateMutation.mutate({...updatedProblem, id: updatedProblem.id});
-      setNewExperiment('');
+    if (id && newExperiment.trim()) {
+      createExperimentMutation.mutate({ problem: id, proposal: newExperiment.trim() });
     }
   };
 
 
-  if (isLoadingProblem || isLoadingResearch) return <div className="text-center p-4">Loading problem details...</div>;
-  if (isErrorProblem || isErrorResearch) return <div className="text-center p-4 text-red-600">Error fetching data.</div>;
+  if (isLoadingProblem || isLoadingResearch || isLoadingExperiments) return <div className="text-center p-4">Loading problem details...</div>;
+  if (isErrorProblem || isErrorResearch || isErrorExperiments) return <div className="text-center p-4 text-red-600">Error fetching data.</div>;
   if (!problem) return <div className="text-center p-4">Problem not found.</div>
 
   return (
@@ -243,7 +274,7 @@ export function Problem() {
                   <input
                     type="checkbox"
                     checked={research.isApproved || false}
-                    onChange={(e) => updateResearchIsApprovedMutation.mutate({ problemId: problem.id.toString(), researchId: research.id, isApproved: e.target.checked })}
+                    onChange={(e) => updateResearchIsApprovedMutation.mutate({ problem: problem.id.toString(), research: research.id, isApproved: e.target.checked })}
                     className="mr-2"
                   />
                   <p className="flex-1 pr-4 whitespace-pre-wrap">{research.content}</p>
@@ -266,19 +297,19 @@ export function Problem() {
             value={newExperiment}
             onChange={(e) => setNewExperiment(e.target.value)}
             onButtonClick={handleAddExperiment}
-            placeholder="Add new experiment..."
+            placeholder="Propose an experiment..."
             buttonText="Add Experiment"
             buttonVariant="success"
-            inputType="textarea"
+            inputType="input"
           />
         </Card>
         <div className="space-y-4">
-          {problem.relatedExperiments && problem.relatedExperiments.length > 0 ? (
-            problem.relatedExperiments.map((experiment, index) => (
-              <Card key={index}>
-                <Link to="#">
-                  {experiment}
-                </Link>
+          {experiments && experiments.length > 0 ? (
+            experiments.map((experiment) => (
+              <Card key={experiment.id}>
+                <div className="flex items-center">
+                  <p className="flex-1 pr-4 whitespace-pre-wrap">{experiment.proposal}</p>
+                </div>
               </Card>
             ))
           ) : (

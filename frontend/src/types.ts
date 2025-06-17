@@ -12,3 +12,9 @@ export interface Problem {
   relatedExperiments: string[];
   isInvestigate?: boolean;
 }
+
+export interface Experiment {
+  id: number;
+  proposal: string;
+  problem: Problem;
+}
