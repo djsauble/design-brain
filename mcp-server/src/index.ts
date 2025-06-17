@@ -10,6 +10,9 @@ const server = new McpServer({
 
 const BASE_URL = "http://localhost:3000";
 
+/**
+ * Fetches all problems that have been flagged for investigation
+ */
 server.resource(
   "listProblemsToInvestigate",
   "problems:///",
@@ -32,6 +35,9 @@ server.resource(
   }
 );
 
+/**
+ * Fetches a specific problem by ID
+ */
 server.resource(
   "getProblem",
   new ResourceTemplate("problems://{id}", { list: undefined }),
@@ -52,6 +58,86 @@ server.resource(
       }],
     };
   },
+);
+
+/**
+ * Adds a new research finding to a specific problem.
+ */
+server.tool(
+  "addResearch",
+  "Adds a new research finding to a specific problem.",
+  {
+    problemId: z.string().describe("The ID of the problem to add research to."),
+    content: z.string().describe("The content of the research finding."),
+  },
+  async ({ problemId, content }) => {
+    const response = await fetch(`${BASE_URL}/problems/${problemId}/research`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return {
+      content: [{
+        type: "text",
+        text: `Research added for problem ${problemId}.`,
+      }],
+    };
+  }
+);
+
+/**
+ * Lists all research associated with a problem.
+ */
+server.resource(
+  "listResearch",
+  new ResourceTemplate("problems://{id}/research", { list: undefined }),
+  {
+    title: "Fetch Research",
+    description: "Lists all research associated with a problem.",
+  },
+  async (uri, { id }) => {
+    const response = await fetch(`${BASE_URL}/problems/${id}/research`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return {
+      content: [{
+        uri: uri.href,
+        type: "text",
+        text: await response.text(),
+      }],
+    };
+  },
+);
+
+/**
+ * Fetches all research for a problem that the user has approved.
+ */
+server.resource(
+  "getApprovedResearch",
+  new ResourceTemplate("problems://{id}/research/approved", { list: undefined }),
+  {
+    title: "Fetch Approved Research",
+    description: "Fetches all research for a problem that the user has approved.",
+  },
+  async (uri, { problemId }) => {
+    const response = await fetch(`${BASE_URL}/problems/${problemId}/research/approved`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return {
+      content: [{
+        uri: uri.href,
+        type: "text",
+        text: await response.text(),
+      }],
+    };
+  }
 );
 
 /**
