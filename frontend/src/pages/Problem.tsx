@@ -275,8 +275,8 @@ export function Problem() {
         <div className="space-y-4">
           {problem.relatedExperiments && problem.relatedExperiments.length > 0 ? (
             problem.relatedExperiments.map((experiment, index) => (
-              <Card>
-                <Link key={index} to="#">
+              <Card key={index}>
+                <Link to="#">
                   {experiment}
                 </Link>
               </Card>
