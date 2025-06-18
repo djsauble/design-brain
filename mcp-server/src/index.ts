@@ -5,6 +5,7 @@ import { z } from "zod";
 // --- MCP Server Implementation ---
 const server = new McpServer({
   name: "design-brain",
+  description: "Provides hooks into the design process so that a human and agent can collaborate on problem solving together.",
   version: "1.0.0",
 });
 
@@ -13,21 +14,19 @@ const BASE_URL = "http://localhost:3000";
 /**
  * Fetches all problems that have been flagged for investigation
  */
-server.resource(
+server.registerTool(
   "listProblemsToInvestigate",
-  "problems:///",
   {
-    title: "Fetch Problems To Investigate",
-    description: "Fetches the filtered list of problems that the human user has already marked for investigation.",
+    description: "Fetch the list of design problems that are ready for investigation.",
+    inputSchema: {},
   },
-  async (uri, extra) => {
+  async () => {
     const response = await fetch(`${BASE_URL}/problems/investigate`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return {
-      contents: [{
-        uri: uri.href,
+      content: [{
         type: "text",
         text: await response.text(),
       }],
@@ -38,21 +37,21 @@ server.resource(
 /**
  * Fetches a specific problem by ID
  */
-server.resource(
+server.registerTool(
   "getProblem",
-  new ResourceTemplate("problems://{id}", { list: undefined }),
   {
-    title: "Fetch Problem",
-    description: "Retrieves a single problem by its ID.",
+    description: "Retrieve a single design problem by its ID.",
+    inputSchema: {
+      id: z.string().describe("The ID of the problem to retrieve."),
+    },
   },
-  async (uri, { id }) => {
+  async ({ id }) => {
     const response = await fetch(`${BASE_URL}/problems/${id}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return {
-      contents: [{
-        uri: uri.href,
+      content: [{
         type: "text",
         text: await response.text(),
       }],
@@ -66,7 +65,7 @@ server.resource(
 server.registerTool(
   "addResearch",
   {
-    description: "Adds a new research finding to a specific problem.",
+    description: "Add a research finding to a design problem. These are a sentence or two and are intended to provide insights into possible solutions based on [simulated] user research.",
     inputSchema: {
       id: z.number().describe("The ID of the problem to add research to."),
       content: z.string().describe("The content of the research finding."),
@@ -95,21 +94,21 @@ server.registerTool(
 /**
  * Lists all research associated with a problem.
  */
-server.resource(
+server.registerTool(
   "listResearch",
-  new ResourceTemplate("problems://{id}/research", { list: undefined }),
   {
-    title: "Fetch Research",
-    description: "Lists all research associated with a problem.",
+    description: "List all research findings associated with a design problem.",
+    inputSchema: {
+      id: z.string().describe("The ID of the problem to list research for."),
+    },
   },
-  async (uri, { id }) => {
+  async ({ id }) => {
     const response = await fetch(`${BASE_URL}/problems/${id}/research`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return {
-      contents: [{
-        uri: uri.href,
+      content: [{
         type: "text",
         text: await response.text(),
       }],
@@ -120,55 +119,21 @@ server.resource(
 /**
  * Fetches all research for a problem that the user has approved.
  */
-server.resource(
+server.registerTool(
   "getApprovedResearch",
-  new ResourceTemplate("problems://{id}/research/approved", { list: undefined }),
   {
-    title: "Fetch Approved Research",
-    description: "Fetches all research for a problem that the user has approved.",
+    description: "List all research findings for a design problem that the user has approved. This is a way for humans to review insights before any experiments are proposed.",
+    inputSchema: {
+      id: z.string().describe("The ID of the problem to fetch approved research for."),
+    },
   },
-  async (uri, { id }) => {
+  async ({ id }) => {
     const response = await fetch(`${BASE_URL}/problems/${id}/research/approved`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return {
-      contents: [{
-        uri: uri.href,
-        type: "text",
-        text: await response.text(),
-      }],
-    };
-  }
-);
-
-/**
- * Main function to start the server.
- */
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("Design Process MCP Server running on stdio...");
-}
-
-/**
- * Fetches approved experiments the agent can begin work on.
- */
-server.resource(
-  "getApprovedExperiments",
-  new ResourceTemplate("problems://{problemId}/experiments/approved", { list: undefined }),
-  {
-    title: "Fetch Approved Experiments",
-    description: "Fetches approved experiments the agent can begin work on.",
-  },
-  async (uri, { problemId }) => {
-    const response = await fetch(`${BASE_URL}/problems/${problemId}/experiments/approved`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return {
-      contents: [{
-        uri: uri.href,
+      content: [{
         type: "text",
         text: await response.text(),
       }],
@@ -182,7 +147,7 @@ server.resource(
 server.registerTool(
   "addExperiment",
   {
-    description: "Proposes a new experiment based on approved research.",
+    description: "Propose a new experiment based on approved research. The proposal should be a sentence or two, and describe a possible solution that could be prototyped if the human approves the idea.",
     inputSchema: {
       problem: z.string().describe("The ID of the problem to add the experiment to."),
       proposal: z.string().describe("The proposal for the experiment."),
@@ -209,12 +174,37 @@ server.registerTool(
 );
 
 /**
+ * Fetches approved experiments the agent can begin work on.
+ */
+server.registerTool(
+  "getApprovedExperiments",
+  {
+    description: "List approved experiments the agent can begin work on.",
+    inputSchema: {
+      problemId: z.string().describe("The ID of the problem to fetch approved experiments for."),
+    },
+  },
+  async ({ problemId }) => {
+    const response = await fetch(`${BASE_URL}/problems/${problemId}/experiments/approved`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return {
+      content: [{
+        type: "text",
+        text: await response.text(),
+      }],
+    };
+  }
+);
+
+/**
  * Marks an experiment as "in progress."
  */
 server.registerTool(
   "startExperiment",
   {
-    description: "Marks an experiment as 'in progress.'",
+    description: "Mark an experiment as 'in progress'. This is to prevent other agents from picking it up, in situations where multiple experiments are being run in parallel.",
     inputSchema: {
       problem: z.string().describe("The ID of the problem the experiment belongs to."),
       experimentId: z.string().describe("The ID of the experiment to start."),
@@ -246,7 +236,7 @@ server.registerTool(
 server.registerTool(
   "completeExperiment",
   {
-    description: "Marks an experiment as 'done' and attaches a URL to the results.",
+    description: "Mark an experiment as 'finished' and attach a URL that the human can open in their browser to review the results of the experiment. The agent should be sure to run the prototype so that this URL doesn't result in a 404.",
     inputSchema: {
       problem: z.string().describe("The ID of the problem the experiment belongs to."),
       experimentId: z.string().describe("The ID of the experiment to complete."),
@@ -272,6 +262,15 @@ server.registerTool(
     };
   }
 );
+
+/**
+ * Main function to start the server.
+ */
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("Design Process MCP Server running on stdio...");
+}
 
 main().catch((error) => {
   console.error("Server failed to start:", error);
